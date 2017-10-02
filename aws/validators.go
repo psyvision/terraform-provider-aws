@@ -1550,6 +1550,23 @@ func validateCognitoUserPoolAutoVerifiedAttribute(v interface{}, k string) (ws [
 	return
 }
 
+func validateCognitoUserPoolClientAuthFlows(v interface{}, k string) (ws []string, es []error) {
+	validValues := []string{
+		cognitoidentityprovider.AuthFlowTypeAdminNoSrpAuth,
+		cognitoidentityprovider.AuthFlowTypeCustomAuth,
+	}
+	period := v.(string)
+	for _, f := range validValues {
+		if period == f {
+			return
+		}
+	}
+	es = append(es, fmt.Errorf(
+		"%q contains an invalid alias attribute %q. Valid alias attributes are %q.",
+		k, period, validValues))
+	return
+}
+
 func validateWafMetricName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	if !regexp.MustCompile(`^[0-9A-Za-z]+$`).MatchString(value) {
