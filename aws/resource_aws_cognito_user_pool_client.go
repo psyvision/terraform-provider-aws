@@ -25,7 +25,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"generate_secret": {
-				Type:     schema.TypeBoolean,
+				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -37,14 +37,14 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"explicit_auth_flows": {
-				Type: 	  schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: false,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCognitoUserPoolClientAuthFlows,
 				},
-			}
+			},
 		},
 	}
 }
@@ -57,7 +57,7 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if v, ok := d.GetOk("generate_secret"); ok {
-		params.GenerateSecret = aws.Boolean(v.(bool))
+		params.GenerateSecret = aws.Bool(v.(bool))
 	}
 
 	if v, ok := d.GetOk("user_pool_id"); ok {
@@ -85,7 +85,8 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	conn := meta.(*AWSClient).cognitoidpconn
 
 	params := &cognitoidentityprovider.DescribeUserPoolClientInput{
-		ClientId: aws.String(d.Id()),
+		ClientId:   aws.String(d.Id()),
+		UserPoolId: aws.String(d.Get("user_pool_id").(string)),
 	}
 
 	log.Printf("[DEBUG] Reading Cognito User Pool Client: %s", params)
@@ -104,13 +105,10 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	if resp.UserPoolClient.ExplicitAuthFlows != nil {
 		d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
 	}
-	if resp.UserPoolClient.GenerateSecret != nil {
-		d.Set("generate_secret", *resp.UserPoolClient.GenerateSecret)
-	}
 	if resp.UserPoolClient.UserPoolId != nil {
 		d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
 	}
-	
+
 	return nil
 }
 
@@ -127,10 +125,6 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 
 	if d.HasChange("user_pool_id") {
 		params.UserPoolId = aws.String(d.Get("user_pool_id").(string))
-	}
-
-	if d.HasChange("generate_secret") {
-		params.GenerateSecret = aws.Boolean(d.Get("generate_secret").(string))
 	}
 
 	log.Printf("[DEBUG] Updating Cognito User Pool Client: %s", params)
