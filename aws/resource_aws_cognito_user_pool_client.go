@@ -32,7 +32,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 
 			"user_pool_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 
@@ -54,14 +54,11 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 
 	params := &cognitoidentityprovider.CreateUserPoolClientInput{
 		ClientName: aws.String(d.Get("name").(string)),
+		UserPoolId: aws.String(d.Get("user_pool_id").(string)),
 	}
 
 	if v, ok := d.GetOk("generate_secret"); ok {
 		params.GenerateSecret = aws.Bool(v.(bool))
-	}
-
-	if v, ok := d.GetOk("user_pool_id"); ok {
-		params.UserPoolId = aws.String(v.(string))
 	}
 
 	if v, ok := d.GetOk("explicit_auth_flows"); ok {
@@ -77,6 +74,8 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	d.SetId(*resp.UserPoolClient.ClientId)
+	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
+	d.Set("name", *resp.UserPoolClient.ClientName)
 
 	return resourceAwsCognitoUserPoolClientRead(d, meta)
 }
@@ -105,9 +104,10 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	if resp.UserPoolClient.ExplicitAuthFlows != nil {
 		d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
 	}
-	if resp.UserPoolClient.UserPoolId != nil {
-		d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
-	}
+
+	d.SetId(*resp.UserPoolClient.ClientId)
+	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
+	d.Set("name", *resp.UserPoolClient.ClientName)
 
 	return nil
 }
@@ -116,15 +116,12 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 	conn := meta.(*AWSClient).cognitoidpconn
 
 	params := &cognitoidentityprovider.UpdateUserPoolClientInput{
-		ClientId: aws.String(d.Id()),
+		ClientId:   aws.String(d.Id()),
+		UserPoolId: aws.String(d.Get("user_pool_id").(string)),
 	}
 
 	if d.HasChange("explicit_auth_flows") {
 		params.ExplicitAuthFlows = expandStringList(d.Get("explicit_auth_flows").([]interface{}))
-	}
-
-	if d.HasChange("user_pool_id") {
-		params.UserPoolId = aws.String(d.Get("user_pool_id").(string))
 	}
 
 	log.Printf("[DEBUG] Updating Cognito User Pool Client: %s", params)
@@ -141,7 +138,8 @@ func resourceAwsCognitoUserPoolClientDelete(d *schema.ResourceData, meta interfa
 	conn := meta.(*AWSClient).cognitoidpconn
 
 	params := &cognitoidentityprovider.DeleteUserPoolClientInput{
-		UserPoolId: aws.String(d.Id()),
+		ClientId:   aws.String(d.Id()),
+		UserPoolId: aws.String(d.Get("user_pool_id").(string)),
 	}
 
 	log.Printf("[DEBUG] Deleting Cognito User Pool Client: %s", params)

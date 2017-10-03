@@ -26,6 +26,8 @@ func TestAccAWSCognitoUserPoolClient_basic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckAWSCognitoUserPoolClientExists("aws_cognito_user_pool_client.client"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "name", name),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.#", "1"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.0", "ADMIN_NO_SRP_AUTH"),
 				),
 			},
 		},
@@ -42,7 +44,7 @@ func testAccCheckAWSCognitoUserPoolClientDestroy(s *terraform.State) error {
 
 		params := &cognitoidentityprovider.DescribeUserPoolClientInput{
 			ClientId:   aws.String(rs.Primary.ID),
-			UserPoolId: aws.String(rs.Primary.UserPoolId),
+			UserPoolId: aws.String(rs.Primary.Attributes["user_pool_id"]),
 		}
 
 		_, err := conn.DescribeUserPoolClient(params)
@@ -73,7 +75,7 @@ func testAccCheckAWSCognitoUserPoolClientExists(name string) resource.TestCheckF
 
 		params := &cognitoidentityprovider.DescribeUserPoolClientInput{
 			ClientId:   aws.String(rs.Primary.ID),
-			UserPoolId: aws.String(rs.Primary.UserPoolId),
+			UserPoolId: aws.String(rs.Primary.Attributes["user_pool_id"]),
 		}
 
 		_, err := conn.DescribeUserPoolClient(params)
@@ -92,6 +94,7 @@ resource "aws_cognito_user_pool_client" "client" {
   name = "%s"
 
   user_pool_id = "${aws_cognito_user_pool.pool.id}"
+  explicit_auth_flows = [ "ADMIN_NO_SRP_AUTH" ]
 }
 
 resource "aws_cognito_user_pool" "pool" {
