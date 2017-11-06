@@ -44,8 +44,8 @@ resource "aws_cognito_user_pool_client" "client" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the user pool.
-* `generate_secret` - (Optional) The subject line for verification emails.
+* `name` - (Required) The name of the application client.
+* `generate_secret` - (Optional) Should an application secret be generated. AWS JavaScript SDK requires this to be false.
 * `user_pool_id` - (Required) The user pool the client belongs to.
 * `explicit_auth_flows` - (Optional) List of authentication flows (ADMIN_NO_SRP_AUTH, CUSTOM_AUTH_FLOW_ONLY)
 
