@@ -27,8 +27,9 @@ func resourceAwsBatchJobQueue() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validateBatchName,
 			},
 			"priority": {
 				Type:     schema.TypeInt,
@@ -159,8 +160,8 @@ func resourceAwsBatchJobQueueDelete(d *schema.ResourceData, meta interface{}) er
 	_, err = conn.DeleteJobQueue(&batch.DeleteJobQueueInput{
 		JobQueue: aws.String(sn),
 	})
-	if err == nil {
-		return nil
+	if err != nil {
+		return err
 	}
 
 	deleteStateConf := &resource.StateChangeConf{

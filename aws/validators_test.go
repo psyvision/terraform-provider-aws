@@ -2719,3 +2719,56 @@ func TestValidateCognitoRoleMappingsType(t *testing.T) {
 		}
 	}
 }
+
+func TestValidateDxConnectionBandWidth(t *testing.T) {
+	validValues := []string{
+		"1Gbps",
+		"10Gbps",
+	}
+
+	for _, s := range validValues {
+		_, errors := validateDxConnectionBandWidth(s, "match_type")
+		if len(errors) > 0 {
+			t.Fatalf("%s should be a valid Direct Connect Connection Bandwidth: %v", s, errors)
+		}
+	}
+
+	invalidValues := []string{
+		"1gbps",
+		"10GBPS",
+		"invalid character",
+	}
+
+	for _, s := range invalidValues {
+		_, errors := validateDxConnectionBandWidth(s, "match_type")
+		if len(errors) == 0 {
+			t.Fatalf("%s should not be a valid Direct Connect Connection Bandwidth: %v", s, errors)
+		}
+	}
+}
+
+func TestValidateCognitoUserPoolReplyEmailAddress(t *testing.T) {
+	validTypes := []string{
+		"foo@gmail.com",
+		"foo@bar",
+		"foo bar@gmail.com",
+		"foo+bar.baz@gmail.com",
+	}
+	for _, v := range validTypes {
+		_, errors := validateCognitoUserPoolReplyEmailAddress(v, "name")
+		if len(errors) != 0 {
+			t.Fatalf("%q should be a valid Cognito User Pool Reply Email Address: %q", v, errors)
+		}
+	}
+
+	invalidTypes := []string{
+		"foo",
+		"@bar.baz",
+	}
+	for _, v := range invalidTypes {
+		_, errors := validateCognitoUserPoolReplyEmailAddress(v, "name")
+		if len(errors) == 0 {
+			t.Fatalf("%q should be an invalid Cognito User Pool Reply Email Address", v)
+		}
+	}
+}
