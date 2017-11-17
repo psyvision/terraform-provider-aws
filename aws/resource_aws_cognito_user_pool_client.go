@@ -45,6 +45,41 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 					ValidateFunc: validateCognitoUserPoolClientAuthFlows,
 				},
 			},
+
+			"attributes": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"data_type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"developer_only": {
+							Type:     schema.TypeBool,
+							Required: false,
+						},
+
+						"mutable": {
+							Type:      schema.TypeBool,
+							Required:  false,
+						},
+
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+
+						"required": {
+							Type:      schema.TypeBool,
+							Required:  false,
+						},
+					},
+				},
+				Set: resourceAwsSecurityGroupRuleHash,// schema.HashString
+			},
 		},
 	}
 }
@@ -101,6 +136,13 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 		return err
 	}
 
+	localAttributes := d.Get("attributes").(*schema.Set).List()
+	// remoteIngressRules := resourceAwsSecurityGroupIPPermGather(d.Id(), sg.IpPermissions, sg.OwnerId)
+
+	if err := d.Set("attributes", localAttributes); err != nil {
+		log.Printf("[WARN] Error setting Attributes set for (%s): %s", d.Id(), err)
+	}
+
 	if resp.UserPoolClient.ExplicitAuthFlows != nil {
 		d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
 	}
@@ -118,6 +160,11 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 	params := &cognitoidentityprovider.UpdateUserPoolClientInput{
 		ClientId:   aws.String(d.Id()),
 		UserPoolId: aws.String(d.Get("user_pool_id").(string)),
+	}
+
+	err = resourceAwsCognitoUserPoolClientUpdateAttributes(d, "attributes", meta, group)
+	if err != nil {
+		return err
 	}
 
 	if d.HasChange("explicit_auth_flows") {
