@@ -63,6 +63,13 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+
+			"refresh_token_validity": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     false,
+				ValidateFunc: validateIntegerInRange(0, 3650),
+			},
 		},
 	}
 }
@@ -89,6 +96,10 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 
 	if v, ok := d.GetOk("write_attributes"); ok {
 		params.WriteAttributes = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("refresh_token_validity"); ok {
+		params.RefreshTokenValidity = aws.Int64(v.(int64))
 	}
 
 	log.Printf("[DEBUG] Creating Cognito User Pool Client: %s", params)
@@ -139,6 +150,10 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 		d.Set("write_attributes", flattenStringList(resp.UserPoolClient.WriteAttributes))
 	}
 
+	if resp.UserPoolClient.RefreshTokenValidity != nil {
+		d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
+	}
+
 	d.SetId(*resp.UserPoolClient.ClientId)
 	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
 	d.Set("name", *resp.UserPoolClient.ClientName)
@@ -164,6 +179,10 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 
 	if d.HasChange("write_attributes") {
 		params.WriteAttributes = expandStringList(d.Get("write_attributes").([]interface{}))
+	}
+
+	if d.HasChange("refresh_token_validity") {
+		params.RefreshTokenValidity = aws.Int64(d.Get("refresh_token_validity").(int64))
 	}
 
 	log.Printf("[DEBUG] Updating Cognito User Pool Client: %s", params)
