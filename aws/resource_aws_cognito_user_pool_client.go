@@ -45,6 +45,24 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 					ValidateFunc: validateCognitoUserPoolClientAuthFlows,
 				},
 			},
+
+			"read_attributes": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+
+			"write_attributes": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -63,6 +81,14 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 
 	if v, ok := d.GetOk("explicit_auth_flows"); ok {
 		params.ExplicitAuthFlows = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("read_attributes"); ok {
+		params.ReadAttributes = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("write_attributes"); ok {
+		params.WriteAttributes = expandStringList(v.([]interface{}))
 	}
 
 	log.Printf("[DEBUG] Creating Cognito User Pool Client: %s", params)
@@ -105,6 +131,14 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 		d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
 	}
 
+	if resp.UserPoolClient.ReadAttributes != nil {
+		d.Set("read_attributes", flattenStringList(resp.UserPoolClient.ReadAttributes))
+	}
+
+	if resp.UserPoolClient.WriteAttributes != nil {
+		d.Set("write_attributes", flattenStringList(resp.UserPoolClient.WriteAttributes))
+	}
+
 	d.SetId(*resp.UserPoolClient.ClientId)
 	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
 	d.Set("name", *resp.UserPoolClient.ClientName)
@@ -122,6 +156,14 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 
 	if d.HasChange("explicit_auth_flows") {
 		params.ExplicitAuthFlows = expandStringList(d.Get("explicit_auth_flows").([]interface{}))
+	}
+
+	if d.HasChange("read_attributes") {
+		params.ReadAttributes = expandStringList(d.Get("read_attributes").([]interface{}))
+	}
+
+	if d.HasChange("write_attributes") {
+		params.WriteAttributes = expandStringList(d.Get("write_attributes").([]interface{}))
 	}
 
 	log.Printf("[DEBUG] Updating Cognito User Pool Client: %s", params)
