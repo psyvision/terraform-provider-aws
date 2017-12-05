@@ -47,7 +47,10 @@ The following arguments are supported:
 * `name` - (Required) The name of the application client.
 * `generate_secret` - (Optional) Should an application secret be generated. AWS JavaScript SDK requires this to be false.
 * `user_pool_id` - (Required) The user pool the client belongs to.
-* `explicit_auth_flows` - (Optional) List of authentication flows (ADMIN_NO_SRP_AUTH, CUSTOM_AUTH_FLOW_ONLY)
+* `explicit_auth_flows` - (Optional) List of authentication flows (ADMIN_NO_SRP_AUTH, CUSTOM_AUTH_FLOW_ONLY).
+* `read_attributes` - (Optional) List of user pool attributes the application client can read from.
+* `refresh_token_validity` - (Optional) The time limit in days refresh tokens are valid for.
+* `write_attributes` - (Optional) List of user pool attributes the application client can write to. 
 
 ## Attribute Reference
 
