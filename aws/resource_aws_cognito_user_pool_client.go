@@ -22,7 +22,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			
+
 			"client_secret": {
 				Type:     schema.TypeString,
 				Computed: false,
@@ -154,7 +154,7 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	if resp.UserPoolClient.RefreshTokenValidity != nil {
 		d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
 	}
-	
+
 	if resp.UserPoolClient.ClientSecret != nil {
 		d.Set("client_secret", resp.UserPoolClient.ClientSecret)
 	}
