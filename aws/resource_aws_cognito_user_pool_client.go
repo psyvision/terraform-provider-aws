@@ -68,7 +68,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"refresh_token_validity": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      30
+				Default:      30,
 				ValidateFunc: validateIntegerInRange(0, 3650),
 			},
 		},
