@@ -21,7 +21,11 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+			},
+			
+			"client_secret": {
+				Type:     schema.TypeString,
+				Computed: false,
 			},
 
 			"generate_secret": {
@@ -39,7 +43,6 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"explicit_auth_flows": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: false,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCognitoUserPoolClientAuthFlows,
@@ -49,7 +52,6 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"read_attributes": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -58,7 +60,6 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"write_attributes": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -67,7 +68,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			"refresh_token_validity": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ForceNew:     false,
+				Default:      30
 				ValidateFunc: validateIntegerInRange(0, 3650),
 			},
 		},
@@ -99,7 +100,7 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if v, ok := d.GetOk("refresh_token_validity"); ok {
-		params.RefreshTokenValidity = aws.Int64(v.(int64))
+		params.RefreshTokenValidity = aws.Int64(int64(v.(int)))
 	}
 
 	log.Printf("[DEBUG] Creating Cognito User Pool Client: %s", params)
@@ -130,7 +131,7 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	resp, err := conn.DescribeUserPoolClient(params)
 
 	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "ResourceNotFoundException" {
+		if isAWSErr(err, "ResourceNotFoundException", "") {
 			log.Printf("[WARN] Cognito User Pool Client %s is already gone", d.Id())
 			d.SetId("")
 			return nil
@@ -152,6 +153,10 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 
 	if resp.UserPoolClient.RefreshTokenValidity != nil {
 		d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
+	}
+	
+	if resp.UserPoolClient.ClientSecret != nil {
+		d.Set("client_secret", resp.UserPoolClient.ClientSecret)
 	}
 
 	d.SetId(*resp.UserPoolClient.ClientId)
