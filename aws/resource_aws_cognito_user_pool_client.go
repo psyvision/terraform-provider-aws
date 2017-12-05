@@ -138,29 +138,14 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 		return err
 	}
 
-	if resp.UserPoolClient.ExplicitAuthFlows != nil {
-		d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
-	}
-
-	if resp.UserPoolClient.ReadAttributes != nil {
-		d.Set("read_attributes", flattenStringList(resp.UserPoolClient.ReadAttributes))
-	}
-
-	if resp.UserPoolClient.WriteAttributes != nil {
-		d.Set("write_attributes", flattenStringList(resp.UserPoolClient.WriteAttributes))
-	}
-
-	if resp.UserPoolClient.RefreshTokenValidity != nil {
-		d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
-	}
-
-	if resp.UserPoolClient.ClientSecret != nil {
-		d.Set("client_secret", resp.UserPoolClient.ClientSecret)
-	}
-
 	d.SetId(*resp.UserPoolClient.ClientId)
 	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
 	d.Set("name", *resp.UserPoolClient.ClientName)
+	d.Set("explicit_auth_flows", flattenStringList(resp.UserPoolClient.ExplicitAuthFlows))
+	d.Set("read_attributes", flattenStringList(resp.UserPoolClient.ReadAttributes))
+	d.Set("write_attributes", flattenStringList(resp.UserPoolClient.WriteAttributes))
+	d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
+	d.Set("client_secret", resp.UserPoolClient.ClientSecret)
 
 	return nil
 }
