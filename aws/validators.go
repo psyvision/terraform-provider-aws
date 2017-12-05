@@ -1714,20 +1714,19 @@ func validateCognitoUserPoolSchemaName(v interface{}, k string) (ws []string, es
 	return
 }
 
-func validateCognitoUserPoolClientAuthFlows(v interface{}, k string) (ws []string, es []error) {
-	validValues := []string{
-		cognitoidentityprovider.AuthFlowTypeAdminNoSrpAuth,
-		cognitoidentityprovider.AuthFlowTypeCustomAuth,
+func validateCognitoUserPoolClientURL(v interface{}, k string) (ws []string, es []error) {
+	value := v.(string)
+	if len(value) < 1 {
+		es = append(es, fmt.Errorf("%q cannot be less than 1 character", k))
 	}
-	period := v.(string)
-	for _, f := range validValues {
-		if period == f {
-			return
-		}
+
+	if len(value) > 1024 {
+		es = append(es, fmt.Errorf("%q cannot be longer than 1024 character", k))
 	}
-	es = append(es, fmt.Errorf(
-		"%q contains an invalid alias attribute %q. Valid alias attributes are %q.",
-		k, period, validValues))
+
+	if !regexp.MustCompile(`[\p{L}\p{M}\p{S}\p{N}\p{P}]+`).MatchString(value) {
+		es = append(es, fmt.Errorf("%q must satisfy regular expression pattern: [\\p{L}\\p{M}\\p{S}\\p{N}\\p{P}]+", k))
+	}
 	return
 }
 

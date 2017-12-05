@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/cognitoidentityprovider"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 )
 
 func resourceAwsCognitoUserPoolClient() *schema.Resource {
@@ -16,6 +17,11 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 		Update: resourceAwsCognitoUserPoolClientUpdate,
 		Delete: resourceAwsCognitoUserPoolClientDelete,
 
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		// https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_CreateUserPoolClient.html
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -43,8 +49,11 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validateCognitoUserPoolClientAuthFlows,
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						cognitoidentityprovider.AuthFlowTypeAdminNoSrpAuth,
+						cognitoidentityprovider.AuthFlowTypeCustomAuth,
+					}, false),
 				},
 			},
 
@@ -69,6 +78,68 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 				Optional:     true,
 				Default:      30,
 				ValidateFunc: validateIntegerInRange(0, 3650),
+			},
+
+			"allowed_oauth_flows": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 3,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						cognitoidentityprovider.OAuthFlowTypeCode,
+						cognitoidentityprovider.OAuthFlowTypeImplicit,
+						cognitoidentityprovider.OAuthFlowTypeClientCredentials,
+					}, false),
+				},
+			},
+
+			"allowed_oauth_flows_user_pool_client": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+
+			"allowed_oauth_scopes": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+
+			// analytics_configuration
+
+			"callback_urls": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 100,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateCognitoUserPoolClientURL,
+				},
+			},
+
+			"default_redirect_uri": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"logout_urls": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 100,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateCognitoUserPoolClientURL,
+				},
+			},
+
+			"supported_identity_providers": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
@@ -100,6 +171,34 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 
 	if v, ok := d.GetOk("refresh_token_validity"); ok {
 		params.RefreshTokenValidity = aws.Int64(int64(v.(int)))
+	}
+
+	if v, ok := d.GetOk("allowed_oauth_flows"); ok {
+		params.AllowedOAuthFlows = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("allowed_oauth_flows_user_pool_client"); ok {
+		params.AllowedOAuthFlowsUserPoolClient = aws.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("allowed_oauth_scopes"); ok {
+		params.AllowedOAuthScopes = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("callback_urls"); ok {
+		params.CallbackURLs = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("default_redirect_uri"); ok {
+		params.DefaultRedirectURI = aws.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("logout_urls"); ok {
+		params.LogoutURLs = expandStringList(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("supported_identity_providers"); ok {
+		params.SupportedIdentityProviders = expandStringList(v.([]interface{}))
 	}
 
 	log.Printf("[DEBUG] Creating Cognito User Pool Client: %s", params)
@@ -146,6 +245,13 @@ func resourceAwsCognitoUserPoolClientRead(d *schema.ResourceData, meta interface
 	d.Set("write_attributes", flattenStringList(resp.UserPoolClient.WriteAttributes))
 	d.Set("refresh_token_validity", resp.UserPoolClient.RefreshTokenValidity)
 	d.Set("client_secret", resp.UserPoolClient.ClientSecret)
+	d.Set("allowed_oauth_flows", flattenStringList(resp.UserPoolClient.AllowedOAuthFlows))
+	d.Set("allowed_oauth_flows_user_pool_client", resp.UserPoolClient.AllowedOAuthFlowsUserPoolClient)
+	d.Set("allowed_oauth_scopes", flattenStringList(resp.UserPoolClient.AllowedOAuthScopes))
+	d.Set("callback_urls", flattenStringList(resp.UserPoolClient.CallbackURLs))
+	d.Set("default_redirect_uri", resp.UserPoolClient.DefaultRedirectURI)
+	d.Set("logout_urls", flattenStringList(resp.UserPoolClient.LogoutURLs))
+	d.Set("supported_identity_providers", flattenStringList(resp.UserPoolClient.SupportedIdentityProviders))
 
 	return nil
 }
@@ -172,6 +278,34 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 
 	if d.HasChange("refresh_token_validity") {
 		params.RefreshTokenValidity = aws.Int64(d.Get("refresh_token_validity").(int64))
+	}
+
+	if d.HasChange("allowed_oauth_flows") {
+		params.AllowedOAuthFlows = expandStringList(d.Get("allowed_oauth_flows").([]interface{}))
+	}
+
+	if d.HasChange("allowed_oauth_flows_user_pool_client") {
+		params.AllowedOAuthFlowsUserPoolClient = aws.Bool(d.Get("allowed_oauth_flows_user_pool_client").(bool))
+	}
+
+	if d.HasChange("allowed_oauth_scopes") {
+		params.AllowedOAuthScopes = expandStringList(d.Get("allowed_oauth_scopes").([]interface{}))
+	}
+
+	if d.HasChange("callback_urls") {
+		params.ReadAttributes = expandStringList(d.Get("callback_urls").([]interface{}))
+	}
+
+	if d.HasChange("default_redirect_uri") {
+		params.DefaultRedirectURI = aws.String(d.Get("default_redirect_uri").(string))
+	}
+
+	if d.HasChange("logout_urls") {
+		params.LogoutURLs = expandStringList(d.Get("logout_urls").([]interface{}))
+	}
+
+	if d.HasChange("supported_identity_providers") {
+		params.SupportedIdentityProviders = expandStringList(d.Get("supported_identity_providers").([]interface{}))
 	}
 
 	log.Printf("[DEBUG] Updating Cognito User Pool Client: %s", params)
