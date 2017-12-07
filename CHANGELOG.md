@@ -1,9 +1,59 @@
-## 1.3.1 (Unreleased)
+## 1.6.0 (Unreleased)
+
+FEATURES:
+
+* **New Datasource:** `aws_network_interface` [GH-2316]
+* **New Resource:** `aws_dx_connection_association` [GH-2360]
+* **New Resource:** `aws_appautoscaling_scheduled_action` [GH-2231]
+* **New Resource:** `aws_cloudwatch_log_resource_policy` [GH-2243]
+
+IMPROVEMENTS:
+
+* resource/aws_ssm_association: Add `association_name` [GH-2257]
+* resource/aws_ecs_service: Add `network_configuration` [GH-2299]
+* resource/aws_lambda_function: Add `reserved_concurrent_executions` [GH-2504]
+* resource/aws_ecs_service: Add `launch_type` (Fargate support) [GH-2483]
+* resource/aws_ecs_task_definition: Add `cpu`, `memory`, `execution_role_arn` & `requires_compatibilities` (Fargate support) [GH-2483]
+* resource/aws_ecs_cluster: Add arn attribute [GH-2552]
 
 BUG FIXES:
 
-* resource/aws_batch_job_queue: Return errors correctly if deletion fails [GH-2322]
-* resource/aws_security_group_rule: Parse `description` correctly [GH-1959]
+* data-source/aws_instance: Set `placement_group` if available [GH-2400]
+* resource/aws_elasticache_parameter_group: Add StateFunc to make name lowercase [GH-2426]
+* resource/aws_elasticache_replication_group: Modify validation, make replication_group_id lowercase [GH-2432]
+* resource/aws_db_instance: Treat `storage-optimization` as valid state [GH-2409]
+
+## 1.5.0 (November 29, 2017)
+
+FEATURES:
+
+* **New Resource:** `aws_mq_broker` ([#2466](https://github.com/terraform-providers/terraform-provider-aws/issues/2466))
+* **New Resource:** `aws_mq_configuration` ([#2466](https://github.com/terraform-providers/terraform-provider-aws/issues/2466))
+
+## 1.4.0 (November 29, 2017)
+
+BUG FIXES:
+
+* resource/aws_cognito_user_pool: Fix `email_subject_by_link` ([#2395](https://github.com/terraform-providers/terraform-provider-aws/issues/2395))
+* resource/aws_api_gateway_method_response: Fix conflict exception in API gateway method response ([#2393](https://github.com/terraform-providers/terraform-provider-aws/issues/2393))
+* resource/aws_api_gateway_method: Fix typo `authorization_type` -> `authorization` ([#2430](https://github.com/terraform-providers/terraform-provider-aws/issues/2430))
+
+IMPROVEMENTS:
+
+* data-source/aws_nat_gateway: Add missing address attributes to the schema ([#2209](https://github.com/terraform-providers/terraform-provider-aws/issues/2209))
+* resource/aws_ssm_maintenance_window_target: Change MaxItems of targets ([#2361](https://github.com/terraform-providers/terraform-provider-aws/issues/2361))
+* resource/aws_sfn_state_machine: Support Update State machine call ([#2349](https://github.com/terraform-providers/terraform-provider-aws/issues/2349))
+* resource/aws_instance: Set placement_group in state on read if available ([#2398](https://github.com/terraform-providers/terraform-provider-aws/issues/2398))
+
+## 1.3.1 (November 20, 2017)
+
+BUG FIXES:
+
+* resource/aws_ecs_task_definition: Fix equivalency comparator ([#2339](https://github.com/terraform-providers/terraform-provider-aws/issues/2339))
+* resource/aws_batch_job_queue: Return errors correctly if deletion fails ([#2322](https://github.com/terraform-providers/terraform-provider-aws/issues/2322))
+* resource/aws_security_group_rule: Parse `description` correctly ([#1959](https://github.com/terraform-providers/terraform-provider-aws/issues/1959))
+* Fixed Cognito Lambda Config Validation for optional ARN configurations ([#2370](https://github.com/terraform-providers/terraform-provider-aws/issues/2370))
+* resource/aws_cognito_identity_pool_roles_attachment: Fix typo "authenticated" -> "unauthenticated" ([#2358](https://github.com/terraform-providers/terraform-provider-aws/issues/2358))
 
 ## 1.3.0 (November 16, 2017)
 
