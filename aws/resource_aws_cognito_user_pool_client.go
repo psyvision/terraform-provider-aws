@@ -46,19 +46,19 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"explicit_auth_flows": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type: schema.TypeSet,
 					ValidateFunc: validation.StringInSlice([]string{
-						cognitoidentityprovider.AuthFlowTypeAdminNoSrpAuth,
-						cognitoidentityprovider.AuthFlowTypeCustomAuth,
+						cognitoidentityprovider.ExplicitAuthFlowsTypeAdminNoSrpAuth,
+						cognitoidentityprovider.ExplicitAuthFlowsTypeCustomAuthFlowOnly,
 					}, false),
 				},
 			},
 
 			"read_attributes": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -66,7 +66,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"write_attributes": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -81,7 +81,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"allowed_oauth_flows": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 3,
 				Elem: &schema.Schema{
@@ -100,7 +100,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 			},
 
 			"allowed_oauth_scopes": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -210,8 +210,6 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	d.SetId(*resp.UserPoolClient.ClientId)
-	d.Set("user_pool_id", *resp.UserPoolClient.UserPoolId)
-	d.Set("name", *resp.UserPoolClient.ClientName)
 
 	return resourceAwsCognitoUserPoolClientRead(d, meta)
 }
