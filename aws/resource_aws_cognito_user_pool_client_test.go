@@ -27,7 +27,7 @@ func TestAccAWSCognitoUserPoolClient_basic(t *testing.T) {
 					testAccCheckAWSCognitoUserPoolClientExists("aws_cognito_user_pool_client.client"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "name", name),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.0", "ADMIN_NO_SRP_AUTH"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.245201344", "ADMIN_NO_SRP_AUTH"),
 				),
 			},
 		},
@@ -48,27 +48,26 @@ func TestAccAWSCognitoUserPoolClient_allFields(t *testing.T) {
 					testAccCheckAWSCognitoUserPoolClientExists("aws_cognito_user_pool_client.client"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "name", name),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.0", "ADMIN_NO_SRP_AUTH"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "explicit_auth_flows.245201344", "ADMIN_NO_SRP_AUTH"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "generate_secret", "true"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "read_attributes.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "read_attributes.0", "username"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "read_attributes.881205744", "email"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "write_attributes.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "write_attributes.0", "username"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "write_attributes.881205744", "email"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "refresh_token_validity", "300"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows.#", "2"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows.0", "code"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows.1", "token"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows.2645166319", "code"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows.3465961881", "implicit"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_flows_user_pool_client", "true"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_scopes.#", "2"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_scopes.0", "openid"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_scopes.1", "email"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "callback_urls.#", "1"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_scopes.2517049750", "openid"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "allowed_oauth_scopes.881205744", "email"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "callback_urls.#", "2"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "callback_urls.0", "https://www.example.com/callback"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "callback_urls.1", "https://www.example.com/redirect"),
 					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "default_redirect_uri", "https://www.example.com/redirect"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "login_urls.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "login_urls.0", "https://www.example.com/login"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "supported_identity_providers.#", "1"),
-					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "supported_identity_providers.0", "saml_provider_1"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "logout_urls.#", "1"),
+					resource.TestCheckResourceAttr("aws_cognito_user_pool_client.client", "logout_urls.0", "https://www.example.com/login"),
 				),
 			},
 		},
@@ -154,20 +153,18 @@ resource "aws_cognito_user_pool_client" "client" {
 
   generate_secret = "true"
 
-  read_attributes = ["username"]
-  write_attributes = ["username"]
+  read_attributes = ["email"]
+  write_attributes = ["email"]
 
   refresh_token_validity = 300
 
-  allowed_oauth_flows = ["code", "token"]
+  allowed_oauth_flows = ["code", "implicit"]
   allowed_oauth_flows_user_pool_client = "true"
   allowed_oauth_scopes = ["openid", "email"]
   
-  callback_urls = ["https://www.example.com/callback"]
+  callback_urls = ["https://www.example.com/callback", "https://www.example.com/redirect"]
   default_redirect_uri = "https://www.example.com/redirect"
-  login_urls = ["https://www.example.com/login"]
-
-  supported_identity_providers = ["saml_provider_1"]
+  logout_urls = ["https://www.example.com/login"]
 }
 
 resource "aws_cognito_user_pool" "pool" {
