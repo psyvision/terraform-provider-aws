@@ -49,7 +49,7 @@ func resourceAwsCognitoUserPoolClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeSet,
+					Type: schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{
 						cognitoidentityprovider.ExplicitAuthFlowsTypeAdminNoSrpAuth,
 						cognitoidentityprovider.ExplicitAuthFlowsTypeCustomAuthFlowOnly,
@@ -158,15 +158,15 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if v, ok := d.GetOk("explicit_auth_flows"); ok {
-		params.ExplicitAuthFlows = expandStringList(v.([]interface{}))
+		params.ExplicitAuthFlows = expandStringList(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("read_attributes"); ok {
-		params.ReadAttributes = expandStringList(v.([]interface{}))
+		params.ReadAttributes = expandStringList(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("write_attributes"); ok {
-		params.WriteAttributes = expandStringList(v.([]interface{}))
+		params.WriteAttributes = expandStringList(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("refresh_token_validity"); ok {
@@ -174,7 +174,7 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if v, ok := d.GetOk("allowed_oauth_flows"); ok {
-		params.AllowedOAuthFlows = expandStringList(v.([]interface{}))
+		params.AllowedOAuthFlows = expandStringList(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("allowed_oauth_flows_user_pool_client"); ok {
@@ -182,7 +182,7 @@ func resourceAwsCognitoUserPoolClientCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if v, ok := d.GetOk("allowed_oauth_scopes"); ok {
-		params.AllowedOAuthScopes = expandStringList(v.([]interface{}))
+		params.AllowedOAuthScopes = expandStringList(v.(*schema.Set).List())
 	}
 
 	if v, ok := d.GetOk("callback_urls"); ok {
@@ -263,15 +263,15 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 	}
 
 	if d.HasChange("explicit_auth_flows") {
-		params.ExplicitAuthFlows = expandStringList(d.Get("explicit_auth_flows").([]interface{}))
+		params.ExplicitAuthFlows = expandStringList(d.Get("explicit_auth_flows").(*schema.Set).List())
 	}
 
 	if d.HasChange("read_attributes") {
-		params.ReadAttributes = expandStringList(d.Get("read_attributes").([]interface{}))
+		params.ReadAttributes = expandStringList(d.Get("read_attributes").(*schema.Set).List())
 	}
 
 	if d.HasChange("write_attributes") {
-		params.WriteAttributes = expandStringList(d.Get("write_attributes").([]interface{}))
+		params.WriteAttributes = expandStringList(d.Get("write_attributes").(*schema.Set).List())
 	}
 
 	if d.HasChange("refresh_token_validity") {
@@ -279,7 +279,7 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 	}
 
 	if d.HasChange("allowed_oauth_flows") {
-		params.AllowedOAuthFlows = expandStringList(d.Get("allowed_oauth_flows").([]interface{}))
+		params.AllowedOAuthFlows = expandStringList(d.Get("allowed_oauth_flows").(*schema.Set).List())
 	}
 
 	if d.HasChange("allowed_oauth_flows_user_pool_client") {
@@ -287,7 +287,7 @@ func resourceAwsCognitoUserPoolClientUpdate(d *schema.ResourceData, meta interfa
 	}
 
 	if d.HasChange("allowed_oauth_scopes") {
-		params.AllowedOAuthScopes = expandStringList(d.Get("allowed_oauth_scopes").([]interface{}))
+		params.AllowedOAuthScopes = expandStringList(d.Get("allowed_oauth_scopes").(*schema.Set).List())
 	}
 
 	if d.HasChange("callback_urls") {
